@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>偉人なりきりメーカー</title>
+    <meta charset="utf-8">
+    <script src="./main.js" defer></script>
+    <link rel="stylesheet" href="./main.css">
+</head>
+
+<body>
+    <div id="header">
+        <div id="icons">
+            <div id="functions">
+                <!--ペイントボタン-->
+                <!--カメラボタン-->
+            </div>
+            <div id="tools">
+                <!--パレット-->
+            </div>
+        </div>
+    </div>
+    <div id="out">
+        <div id="main">
+            <div id="photo">
+                <!--肖像画-->
+                <canvas id="face" width="300" height="300"></canvas>
+                <body>
+
+                    <!-- Main(Start) -->
+                    <main>
+                
+                        <h1>Howler</h1>
+                        <a href="//zenn.dev/sdkfz181tiger/articles/1385f718c2e60c" target="_blank">👍 Howler.jsでかんたん音源再生</a>
+                
+                        <p>
+                            <button id="btn01">サウンド01</button>
+                            <button id="btn02">サウンド02</button>
+                            <button id="btn03">サウンド03</button>
+                            <button id="btn04">サウンド04</button>
+                            <button id="btn05">サウンド05</button>
+                            <button id="btn06">サウンド06</button>
+                            <button id="btn07">サウンド07</button>
+                            <button id="btn08">サウンド08</button>
+                            <button id="btn09">サウンド09</button>
+                            <button id="btn10">サウンド10</button>
+                        </p>
+                    </main>
+                    <!-- Main(End) -->
+                    
+                    <!-- JavaScript -->
+                    <script src="//cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.js" defer></script>
+                    <script src="./main.js"></script>
+                    <img src="kurohige.png" id="face" alt="画像" />
+                </body>
+                <!--ビデオ-->
+            </div>
+            <!--名前-->
+            <div id="full_name" contenteditable="true">佐藤　清救</div>
+            <!--生没年-->
+            <div id="pirth" contenteditable="true">(1838~1871)</div>
+            <!--プロフィール-->
+            <div id="profile" contenteditable="true">
+                佐藤　清救()は、明治時代の日本において鉄道網の発展に大きく寄与した技師である。
+                1838年、松前藩の商家に生まれた清救は、少年期から機会に強い興味を持ち、
+                明治維進後の西洋技術の流入期にその才能を発揮した。
+                政府の奨学金を受けてイギリスに留学した清救はロンドン大学で機械工学を学び、
+                帰国後は内務省土木局に入省し日本初の国産鉄道建設プロジェクトに携わることになった。
+                彼はその開業を見届ける前に亡くなったが、生前に切望していた「駅舎内の売店設置」は後進らの力によって無事達成された
+            </div>
+        </div>
+        <!--落書きエリア-->
+    </div>
+    <!--アップロードボタン(隠し)-->
+    <input type="file" id="file">
+    <div id="footer">偉人なりきりメーカー</div>
+</body>
+
+</html>
