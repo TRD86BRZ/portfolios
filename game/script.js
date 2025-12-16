@@ -92,7 +92,7 @@ function buyUpgrade(upgradeKey) {
             upgrade.cost = Math.ceil(upgrade.cost * 1.5); // コスト増加
         } else if (upgradeKey === 'booster') {
             autoClickerRate += upgrade.effect; // 自動化レートを増加
-            upgrade.cost = Math.ceil(upgrade.cost * 0.5); // コスト増加
+            upgrade.cost = Math.ceil(upgrade.cost * 2.0); // コスト増加
         }
         
         // --- 画面の更新と保存 ---
