@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スーパー・クリック・ゲーム</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<audio id="clickSound" src="click.mp3" preload="auto"></audio>
+<body>
+    
+    <h1>ポイント：<span id="score">0</span></h1>
+    
+    <div class="rebirth-status">
+        <h2>✨ 転生ポイント: <span id="rebirthPoints">0</span> Pt</h2>
+    </div>
+
+    <button id="clickArea">ここをクリック！</button>
+    
+    <div class="upgrade-area">
+        <h2>アップグレード</h2>
+        <div id="upgradesContainer">
+            </div>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <button id="rebirthButton" onclick="rebirth()" disabled>転生</button>
+    </div>
+
+    <div style="margin-top: 15px;">
+        <button onclick="resetGame()">ゲームをリセット</button>
+    </div>
+    
+    <script src="script.js"></script> 
+</body>
+</html>

@@ -1,0 +1,103 @@
+/* ---------------------------------- */
+/* 全体設定 */
+/* ---------------------------------- */
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f5; /* 薄い背景色 */
+    color: #333; /* 文字色 */
+    text-align: center;
+    padding: 20px;
+    margin: 0;
+    min-height: 100vh; /* 画面全体を使う */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-size: 2.5em;
+    color: #4CAF50; /* スコア表示を強調 */
+    margin-bottom: 30px;
+}
+
+/* ---------------------------------- */
+/* 転生エリア (追加) */
+/* ---------------------------------- */
+
+.rebirth-status {
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background-color: #E0F7FA; /* 水色系の背景 */
+    border-radius: 5px;
+    border: 1px solid #B2EBF2;
+}
+
+.rebirth-status h2 {
+    font-size: 1.2em;
+    color: #00BCD4; /* シアン系の文字色 */
+    margin: 0;
+}
+
+
+/* ---------------------------------- */
+/* クリックエリア (メインボタン) */
+/* ---------------------------------- */
+
+#clickArea {
+    /* ボタンを大きく、目立つようにする */
+    width: 250px;
+    height: 250px;
+    border-radius: 50%; /* 円形にする */
+    background-color: #FFC107; /* 派手な黄色 */
+    color: white;
+    font-size: 1.5em;
+    font-weight: bold;
+    border: 10px solid #FFA000; /* 太い枠線 */
+    cursor: pointer; /* マウスカーソルを指の形に */
+    
+    /* 押した感じの立体感を出す */
+    box-shadow: 0 9px #FF8F00; 
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    user-select: none; /* テキスト選択を禁止 */
+}
+
+/* ボタンが押されたときのアニメーション */
+#clickArea:active {
+    background-color: #FFA000;
+    box-shadow: 0 5px #FF7043; /* 影を浅くして沈んだように見せる */
+    transform: translateY(4px); /* 少し下に移動させる */
+}
+
+/* ---------------------------------- */
+/* アップグレードエリア */
+/* ---------------------------------- */
+
+.upgrade-area {
+    margin-top: 50px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    width: 300px;
+}
+
+.upgrade-area h2 {
+    color: #1976D2;
+    margin-top: 0;
+}
+
+.upgrade-area button {
+    padding: 10px 15px;
+    background-color: #2196F3; /* 青系のボタン */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px 0;
+    transition: background-color 0.2s;
+}
+
+.upgrade-area button:hover {
+    background-color: #1976D2;
+}
