@@ -2,29 +2,28 @@
 // 1. 変数とデータの定義
 // =======================================================
 let score = 0;
-let clickPower = 1; // 1クリックで増えるポイント
-let autoClickerRate = 0; // 1秒あたりの自動獲得ポイント
-let rebirthPoints = 0; // ⭐ 転生ポイント: 永続的なボーナス
+let clickPower = 1;      // 基本クリック力
+let autoClickerRate = 0; // 基本自動獲得レート
+let rebirthPoints = 0;   // 転生ポイント（永続倍率用）
 
-// ⭐ 転生に必要なスコアの閾値
-const REBIRTH_THRESHOLD = 1; 
+const REBIRTH_THRESHOLD = 10000; // 1万から転生可能
+const REBIRTH_BONUS_PER_POINT = 1; // 1ptにつき+100%（1倍分）加算
 
-// アップグレードのデータ構造
 const upgrades = {
-    // クリック力強化アップグレード
     powerUp: {
         id: 'powerUpBtn',
         name: 'クリック力強化',
+        initialCost: 10,
         cost: 10,
-        effect: 2, // クリック力が2増加
+        effect: 2,
         level: 0
     },
-    // 自動化ブースターアップグレード
     booster: {
         id: 'boosterBtn',
         name: '自動化ブースター',
-        cost: 1,
-        effect: 5, // 1秒あたりの自動獲得ポイントが5増加
+        initialCost: 100,
+        cost: 100,
+        effect: 5,
         level: 0
     }
 };
@@ -35,209 +34,154 @@ const upgrades = {
 const scoreDisplay = document.getElementById('score');
 const clickButton = document.getElementById('clickArea');
 const upgradesContainer = document.getElementById('upgradesContainer');
-const rebirthButton = document.getElementById('rebirthButton'); // ⭐ 転生ボタンの要素を取得
-const rebirthPointsDisplay = document.getElementById('rebirthPoints'); // ⭐ 転生ポイント表示要素を取得
+const rebirthButton = document.getElementById('rebirthButton');
+const rebirthPointsDisplay = document.getElementById('rebirthPoints');
 
 // =======================================================
-// 3. アップグレード関連の関数
+// 3. 計算ロジック（倍率の適用）
 // =======================================================
 
-// アップグレードボタンのHTMLを生成し、初期表示を行う
-function initializeUpgrades() {
+// 現在の合計倍率を計算 (1pt = 2倍, 2pt = 3倍...)
+function getMultiplier() {
+    return 1 + (rebirthPoints * REBIRTH_BONUS_PER_POINT);
+}
+
+// 現在の最終的なクリック力を計算
+function getTotalClickPower() {
+    return clickPower * getMultiplier();
+}
+
+// =======================================================
+// 4. 表示更新
+// =======================================================
+
+function updateDisplay() {
+    scoreDisplay.textContent = Math.floor(score).toLocaleString();
+    rebirthPointsDisplay.textContent = rebirthPoints.toLocaleString();
+    
+    // アップグレードボタンの更新
     for (const key in upgrades) {
         const upgrade = upgrades[key];
-        const button = document.createElement('button');
-        button.id = upgrade.id;
-        button.onclick = () => buyUpgrade(key); 
-        upgradesContainer.appendChild(button);
-        updateUpgradeButton(upgrade);
-    }
-}
-
-// ボタンのテキストと状態を更新する
-function updateUpgradeButton(upgrade) {
-    const button = document.getElementById(upgrade.id);
-    if (!button) return; 
-    
-    button.textContent = 
-        `${upgrade.name} Lv.${upgrade.level + 1} (コスト: ${upgrade.cost})`;
-    
-    // スコアが足りない場合はボタンを無効化
-    if (score < upgrade.cost) {
-        button.disabled = true;
-    } else {
-        button.disabled = false;
-    }
-}
-
-// 全てのアップグレードボタンの状態を更新する
-function updateAllUpgradeButtons() {
-    for (const key in upgrades) {
-        updateUpgradeButton(upgrades[key]);
-    }
-}
-
-// アップグレードの購入ロジック
-function buyUpgrade(upgradeKey) {
-    const upgrade = upgrades[upgradeKey];
-
-    if (score >= upgrade.cost) {
-        // --- 購入処理 ---
-        score -= upgrade.cost;
-        upgrade.level += 1; 
-
-        // --- ⭐ 効果の適用とコストの増加 ---
-        if (upgradeKey === 'powerUp') {
-            clickPower += upgrade.effect; // クリック力を増加
-            upgrade.cost = Math.ceil(upgrade.cost * 1.5); // コスト増加
-        } else if (upgradeKey === 'booster') {
-            autoClickerRate += upgrade.effect; // 自動化レートを増加
-            upgrade.cost = Math.ceil(upgrade.cost * 2.0); // コスト増加
+        const btn = document.getElementById(upgrade.id);
+        if (btn) {
+            btn.textContent = `${upgrade.name} Lv.${upgrade.level} (コスト: ${upgrade.cost.toLocaleString()})`;
+            btn.disabled = score < upgrade.cost;
         }
-        
-        // --- 画面の更新と保存 ---
-        scoreDisplay.textContent = score;
-        updateUpgradeButton(upgrade); 
-        updateAllUpgradeButtons(); 
-        updateRebirthStatus(); // ⭐ 転生ステータスを更新
-        saveGame(); 
+    }
+
+    // 転生ボタンの更新
+    const potentialPoints = Math.floor(Math.sqrt(score / 1000));
+    if (score >= REBIRTH_THRESHOLD && potentialPoints > 0) {
+        rebirthButton.disabled = false;
+        rebirthButton.textContent = `転生する (獲得: ${potentialPoints} Pt / 現在:${getMultiplier()}倍)`;
+    } else {
+        rebirthButton.disabled = true;
+        const remaining = REBIRTH_THRESHOLD - score;
+        rebirthButton.textContent = `転生まであと ${Math.max(0, remaining).toLocaleString()} ポイント`;
     }
 }
 
 // =======================================================
-// 4. データ保存・読み込み機能
+// 5. ゲーム機能
+// =======================================================
+
+function buyUpgrade(upgradeKey) {
+    const upgrade = upgrades[upgradeKey];
+    if (score >= upgrade.cost) {
+        score -= upgrade.cost;
+        upgrade.level += 1;
+
+        if (upgradeKey === 'powerUp') {
+            clickPower += upgrade.effect;
+            upgrade.cost = Math.ceil(upgrade.cost * 1.5);
+        } else if (upgradeKey === 'booster') {
+            autoClickerRate += upgrade.effect;
+            upgrade.cost = Math.ceil(upgrade.cost * 2.0);
+        }
+        
+        updateDisplay();
+        saveGame();
+    }
+}
+
+function rebirth() {
+    const potentialPoints = Math.floor(Math.sqrt(score / 1000));
+    if (score >= REBIRTH_THRESHOLD && potentialPoints > 0) {
+        if (!confirm(`${potentialPoints} ポイント獲得して転生しますか？\n（スコアとアップグレードがリセットされます）`)) return;
+
+        rebirthPoints += potentialPoints;
+        
+        // リセット処理
+        score = 0;
+        clickPower = 1;
+        autoClickerRate = 0;
+        
+        for (const key in upgrades) {
+            upgrades[key].level = 0;
+            upgrades[key].cost = upgrades[key].initialCost;
+        }
+
+        saveGame();
+        updateDisplay();
+        alert(`転生しました！現在の倍率: ${getMultiplier()}倍`);
+    }
+}
+
+// =======================================================
+// 6. システム・ループ
 // =======================================================
 
 function saveGame() {
     const gameData = {
-        score: score,
-        clickPower: clickPower,
-        autoClickerRate: autoClickerRate,
-        upgrades: upgrades,
-        rebirthPoints: rebirthPoints // ⭐ 転生ポイントを保存に追加
+        score, clickPower, autoClickerRate, rebirthPoints, upgrades
     };
-    localStorage.setItem('clickerGameSave', JSON.stringify(gameData));
-    console.log("ゲームを保存しました！");
+    localStorage.setItem('clickerGameSave_v2', JSON.stringify(gameData));
 }
 
 function loadGame() {
-    const savedData = localStorage.getItem('clickerGameSave');
-    
+    const savedData = localStorage.getItem('clickerGameSave_v2');
     if (savedData) {
-        const gameData = JSON.parse(savedData);
-        
-        // データを変数に反映
-        score = gameData.score;
-        clickPower = gameData.clickPower;
-        autoClickerRate = gameData.autoClickerRate;
-        rebirthPoints = gameData.rebirthPoints || 0; // ⭐ 転生ポイントをロード
-        
-        // アップグレードの状態を反映
-        for (const key in gameData.upgrades) {
-            if (upgrades[key]) {
-                upgrades[key] = gameData.upgrades[key];
-            }
-        }
-        
-        // 画面を更新
-        scoreDisplay.textContent = score;
-        updateAllUpgradeButtons();
-        updateRebirthStatus(); // ⭐ 転生ステータスを更新
-        console.log("保存データをロードしました。");
-        return true; 
+        const data = JSON.parse(savedData);
+        score = data.score;
+        clickPower = data.clickPower;
+        autoClickerRate = data.autoClickerRate;
+        rebirthPoints = data.rebirthPoints;
+        Object.assign(upgrades, data.upgrades);
     }
-    // 初期状態の場合も転生ポイントの表示は更新
-    updateRebirthStatus();
-    return false; 
+    updateDisplay();
 }
 
-// ⭐ ゲームをリセット (転生ポイントは保持しない完全リセット)
-function resetGame() {
-    localStorage.removeItem('clickerGameSave');
-    window.location.reload(); 
-}
-
-// ⭐ 転生機能のロジック
-function rebirth() {
-    if (score >= REBIRTH_THRESHOLD) {
-        // --- 転生ポイントの計算 ---
-        // 獲得スコアの平方根に基づいたポイントを付与 (増えすぎないように)
-        const newRebirthPoints = Math.floor(Math.sqrt(score / 1000)); 
-        rebirthPoints += newRebirthPoints;
-        
-        // --- ゲームの初期化 ---
-        score = 0
-        // 基本値に戻す
-        clickPower = 1;
-        autoClickerRate = 0;
-        
-        // アップグレードの状態を初期化
-        for (const key in upgrades) {
-            upgrades[key].level = 0;
-            // 初期コストに戻す
-            if (key === 'powerUp') upgrades[key].cost = 10;
-            if (key === 'booster') upgrades[key].cost = 1; 
-        }
-
-        // --- 転生ボーナスの適用 ---
-        // 転生ポイント1ptあたり、クリック力が1増加し、自動レートが1増加
-        clickPower += rebirthPoints;
-        autoClickerRate += rebirthPoints;
-        
-        // --- 画面の更新と保存 ---
-        scoreDisplay.textContent = score;
-        updateAllUpgradeButtons();
-        updateRebirthStatus();
-        saveGame();
-        
-        alert(`転生しました！${newRebirthPoints} 転生ポイントを獲得！`);
-    } else {
-        alert(`転生には ${REBIRTH_THRESHOLD} ポイントが必要です！`);
-    }
-}
-
-// ⭐ 転生ボタンとポイント表示を更新
-function updateRebirthStatus() {
-    rebirthPointsDisplay.textContent = rebirthPoints;
-    
-    if (score >= REBIRTH_THRESHOLD) {
-        const potentialPoints = Math.floor(Math.sqrt(score / 1000));
-        rebirthButton.disabled = false;
-        rebirthButton.textContent = `転生する (獲得: ${potentialPoints} Pt)`;
-    } else {
-        rebirthButton.disabled = true;
-        // 残りスコアを計算し、カンマ区切りで表示 (より見やすくするため)
-        const remaining = REBIRTH_THRESHOLD - score;
-        rebirthButton.textContent = `転生まであと ${remaining.toLocaleString()} ポイント`;
-    }
-}
-
-// =======================================================
-// 5. イベントリスナーとゲームループ
-// =======================================================
-
-// クリックボタンのイベントリスナー
+// クリックイベント
 clickButton.addEventListener('click', () => {
-    score += clickPower; 
-    scoreDisplay.textContent = score.toLocaleString(); // ⭐ カンマ区切りで表示
-    updateAllUpgradeButtons(); 
-    updateRebirthStatus(); 
+    score += getTotalClickPower();
+    updateDisplay();
 });
 
-// 自動クリック処理 (1秒ごとに実行されるゲームループ)
+// 転生ボタンイベント
+rebirthButton.addEventListener('click', rebirth);
+
+// 自動クリックループ (1秒ごと)
 setInterval(() => {
     if (autoClickerRate > 0) {
-        score += autoClickerRate; 
-        scoreDisplay.textContent = score.toLocaleString(); // ⭐ カンマ区切りで表示
-        updateAllUpgradeButtons();
-        updateRebirthStatus(); 
-        saveGame(); 
+        // 自動獲得分にも転生倍率を適用する場合
+        score += (autoClickerRate * getMultiplier());
+        updateDisplay();
+        // 5秒に1回保存するなど負荷軽減してもOK
     }
-}, 1000); 
+}, 1000);
 
-// =======================================================
-// 6. ゲームの初期化 (起動時に実行)
-// =======================================================
+// 初期化
+function init() {
+    // アップグレードボタンの生成
+    for (const key in upgrades) {
+        const upgrade = upgrades[key];
+        const button = document.createElement('button');
+        button.id = upgrade.id;
+        button.className = 'upgrade-btn';
+        button.onclick = () => buyUpgrade(key);
+        upgradesContainer.appendChild(button);
+    }
+    loadGame();
+}
 
-initializeUpgrades(); 
-loadGame();
+init();
